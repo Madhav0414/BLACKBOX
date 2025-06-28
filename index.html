@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Black Box Game</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Black Box</h1>
+  <p>Click an edge number to fire a ray. Click inside cells to guess atom locations.</p>
+  <div id="grid"></div>
+  <div id="info">
+    <p>Guesses: <span id="guess-count">0</span></p>
+    <div id="ray-log"></div>
+    <button onclick="checkGuesses()">Check</button>
+    <button onclick="resetGame()">Reset Game</button>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

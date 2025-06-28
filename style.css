@@ -1,0 +1,73 @@
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background-color: #f2f2f2;
+  padding: 20px;
+}
+
+#grid {
+  display: grid;
+  grid-template-columns: repeat(10, 40px);
+  grid-template-rows: repeat(10, 40px);
+  gap: 2px;
+  justify-content: center;
+  margin: 20px auto;
+}
+
+.cell {
+  width: 40px;
+  height: 40px;
+  background-color: white;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.edge {
+  background-color: #ddd;
+  cursor: pointer;
+}
+
+.inside {
+  cursor: crosshair;
+}
+
+.hit {
+  background-color: red;
+}
+
+.reflect {
+  background-color: blue;
+}
+
+.deflect {
+  background-color: yellow;
+}
+
+.guess {
+  background-color: orange;
+}
+
+.atom {
+  background-color: black;
+  color: white;
+}
+
+#info {
+  margin-top: 20px;
+}
+
+button {
+  margin: 5px;
+  padding: 10px 15px;
+  font-size: 16px;
+}
+
+#ray-log {
+  margin-top: 10px;
+  font-family: monospace;
+}
