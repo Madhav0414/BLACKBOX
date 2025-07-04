@@ -1,189 +1,139 @@
-const gridSize = 10;
-const playSize = 8;
-const atomCount = 4;
-let atoms = [];
+const board = document.getElementById("board");
+const log = document.getElementById("log");
+const guessCountDisplay = document.getElementById("guess-count");
+const revealBtn = document.getElementById("reveal");
+
+const SIZE = 10;
 let guessCount = 0;
-let rayLog = [];
-const grid = document.getElementById("grid");
-const guessDisplay = document.getElementById("guess-count");
-const rayLogDiv = document.getElementById("ray-log");
 
-function isEdge(r, c) {
-  return r === 0 || r === 9 || c === 0 || c === 9;
-}
+const atomCount = 4;
+const atoms = generateRandomAtoms(atomCount);
 
-function resetGame() {
-  atoms = [];
-  guessCount = 0;
-  rayLog = [];
-  guessDisplay.textContent = "0";
-  rayLogDiv.innerHTML = "";
-  const taken = new Set();
-  while (atoms.length < atomCount) {
-    const r = Math.floor(Math.random() * playSize) + 1;
-    const c = Math.floor(Math.random() * playSize) + 1;
-    const key = `${r},${c}`;
-    if (!taken.has(key)) {
-      taken.add(key);
-      atoms.push({ r, c });
-    }
+function generateRandomAtoms(count) {
+  const positions = new Set();
+
+  while (positions.size < count) {
+    const r = Math.floor(Math.random() * 8) + 1;
+    const c = Math.floor(Math.random() * 8) + 1;
+    positions.add(r * SIZE + c);
   }
-  createGrid();
+
+  return Array.from(positions);
 }
 
-function createGrid() {
-  grid.innerHTML = "";
-  for (let r = 0; r < gridSize; r++) {
-    for (let c = 0; c < gridSize; c++) {
-      const cell = document.createElement("div");
-      cell.classList.add("cell");
-      cell.dataset.row = r;
-      cell.dataset.col = c;
+// Build board
+for (let r = 0; r < SIZE; r++) {
+  for (let c = 0; c < SIZE; c++) {
+    const cell = document.createElement("div");
+    cell.classList.add("cell");
 
-      if (isEdge(r, c)) {
-        cell.classList.add("edge");
-        const number = getEdgeNumber(r, c);
-        if (number) {
-          cell.textContent = number;
-          cell.dataset.edge = number;
-          cell.onclick = () => shootRay(r, c, cell, number);
-        }
-      } else {
-        cell.classList.add("inside");
-        cell.onclick = () => markGuess(cell);
+    if ((r === 0 || r === 9 || c === 0 || c === 9) &&
+      !(r === 0 && c === 0) && !(r === 0 && c === 9) &&
+      !(r === 9 && c === 0) && !(r === 9 && c === 9)) {
+      const num = getBorderNumber(r, c);
+      if (num !== null) {
+        cell.classList.add("border");
+        cell.textContent = String(num).padStart(2, "0");
+        cell.addEventListener("click", () => fireRay(num));
       }
-
-      grid.appendChild(cell);
     }
+
+    board.appendChild(cell);
   }
 }
 
-function getEdgeNumber(r, c) {
+function getBorderNumber(r, c) {
   if (r === 0 && c >= 1 && c <= 8) return c;
-  if (c === 9 && r >= 1 && r <= 8) return 8 + r;
-  if (r === 9 && c >= 1 && c <= 8) return 25 - c;
-  if (c === 0 && r >= 1 && r <= 8) return 33 - r;
+  if (c === 9 && r >= 1 && r <= 8) return r + 9;
+  if (r === 9 && c >= 1 && c <= 8) return 27 - c;
+  if (c === 0 && r >= 1 && r <= 8) return 35 - r;
   return null;
 }
 
-function getCellByEdgeNumber(num) {
-  if (num >= 1 && num <= 8) return [0, num];
-  if (num >= 9 && num <= 16) return [num - 8, 9];
-  if (num >= 17 && num <= 24) return [9, 25 - num];
-  if (num >= 25 && num <= 32) return [33 - num, 0];
+function getEntry(num) {
+  if (num >= 1 && num <= 8) return { pos: { r: 0, c: num }, dir: { r: 1, c: 0 } };
+  if (num >= 10 && num <= 17) return { pos: { r: num - 9, c: 9 }, dir: { r: 0, c: -1 } };
+  if (num >= 19 && num <= 26) return { pos: { r: 9, c: 27 - num }, dir: { r: -1, c: 0 } };
+  if (num >= 27 && num <= 34) return { pos: { r: 35 - num, c: 0 }, dir: { r: 0, c: 1 } };
   return null;
 }
 
-function markGuess(cell) {
-  cell.classList.toggle("guess");
-  guessCount = document.querySelectorAll(".guess").length;
-  guessDisplay.textContent = guessCount;
-}
+function fireRay(entry) {
+  clearPaths();
+  guessCount++;
+  guessCountDisplay.textContent = `Guesses: ${guessCount}`;
 
-function shootRay(r, c, entryCell, entryNum) {
-  const dir = getDirection(r, c);
-  let curR = r + dir.dr;
-  let curC = c + dir.dc;
+  let { pos, dir } = getEntry(entry);
+  let path = [];
 
-  while (curR > 0 && curR < 9 && curC > 0 && curC < 9) {
-    if (hasAtom(curR, curC)) {
-      entryCell.classList.add("hit");
-      logRay(entryNum, "absorbed");
+  while (true) {
+    pos = { r: pos.r + dir.r, c: pos.c + dir.c };
+    path.push({ ...pos });
+
+    if (pos.r === 0 || pos.r === 9 || pos.c === 0 || pos.c === 9) {
+      const exit = getBorderNumber(pos.r, pos.c);
+      const result = (exit === entry) ? "Reflected" : `Exit at ${exit}`;
+      log.innerHTML += `<div>Ray ${entry} → ${result}</div>`;
+      drawPath(path);
       return;
     }
 
-    const near = getNearbyAtoms(curR, curC);
-    if (near.length >= 2) {
-      entryCell.classList.add("reflect");
-      logRay(entryNum, "reflected");
+    const idx = pos.r * SIZE + pos.c;
+
+    if (atoms.includes(idx)) {
+      log.innerHTML += `<div>Ray ${entry} → Absorbed</div>`;
+      drawPath(path);
       return;
-    } else if (near.length === 1) {
-      const def = deflect(dir);
-      curR += def.dr;
-      curC += def.dc;
-      entryCell.classList.add("deflect");
-    } else {
-      curR += dir.dr;
-      curC += dir.dc;
+    }
+
+    // Universal diagonal deflection check
+    const diag = getDiagonals(pos);
+    const deflection = diag.find(d => atoms.includes(d.r * SIZE + d.c));
+    if (deflection) {
+      dir = deflect(dir, deflection.name);
+    }
+
+    // Reflection check (blocked from both diagonals)
+    const diagNames = diag.filter(p => atoms.includes(p.r * SIZE + p.c)).map(p => p.name);
+    if ((diagNames.includes("NW") && diagNames.includes("SE")) ||
+      (diagNames.includes("NE") && diagNames.includes("SW"))) {
+      log.innerHTML += `<div>Ray ${entry} → Reflected</div>`;
+      drawPath(path);
+      return;
     }
   }
-
-  const exitNum = getEdgeNumber(curR, curC);
-  entryCell.classList.add("reflect");
-  const exitCell = document.querySelector(`.cell[data-row='${curR}'][data-col='${curC}']`);
-  if (exitCell && exitCell !== entryCell) {
-    exitCell.classList.add("reflect");
-    logRay(entryNum, exitNum);
-  } else {
-    logRay(entryNum, "reflected");
-  }
 }
 
-function logRay(from, to) {
-  const msg = typeof to === "number"
-    ? `Ray: ${from} → ${to}`
-    : `Ray: ${from} → ${to}`;
-  rayLog.push(msg);
-  updateLogDisplay();
-}
-
-function updateLogDisplay() {
-  rayLogDiv.innerHTML = rayLog.map(line => `<div>${line}</div>`).join("");
-}
-
-function getDirection(r, c) {
-  if (r === 0) return { dr: 1, dc: 0 };
-  if (r === 9) return { dr: -1, dc: 0 };
-  if (c === 0) return { dr: 0, dc: 1 };
-  if (c === 9) return { dr: 0, dc: -1 };
-}
-
-function hasAtom(r, c) {
-  return atoms.some(atom => atom.r === r && atom.c === c);
-}
-
-function getNearbyAtoms(r, c) {
-  const near = [];
-  const positions = [
-    [r - 1, c],
-    [r + 1, c],
-    [r, c - 1],
-    [r, c + 1]
+function getDiagonals(pos) {
+  return [
+    { r: pos.r - 1, c: pos.c - 1, name: "NW" },
+    { r: pos.r - 1, c: pos.c + 1, name: "NE" },
+    { r: pos.r + 1, c: pos.c - 1, name: "SW" },
+    { r: pos.r + 1, c: pos.c + 1, name: "SE" }
   ];
-  for (let [nr, nc] of positions) {
-    if (hasAtom(nr, nc)) near.push({ r: nr, c: nc });
-  }
-  return near;
 }
 
-function deflect(dir) {
-  return { dr: dir.dc, dc: dir.dr };
+function deflect(dir, diag) {
+  if (diag === "NW") return dir.r === 1 ? { r: 0, c: 1 } : { r: 1, c: 0 };
+  if (diag === "NE") return dir.r === 1 ? { r: 0, c: -1 } : { r: 1, c: 0 };
+  if (diag === "SW") return dir.r === -1 ? { r: 0, c: 1 } : { r: -1, c: 0 };
+  if (diag === "SE") return dir.r === -1 ? { r: 0, c: -1 } : { r: -1, c: 0 };
+  return dir;
 }
 
-function checkGuesses() {
-  let correct = 0;
-  document.querySelectorAll(".guess").forEach(cell => {
-    const r = parseInt(cell.dataset.row);
-    const c = parseInt(cell.dataset.col);
-    if (hasAtom(r, c)) {
-      correct++;
-      cell.classList.add("atom");
-    } else {
-      cell.classList.add("hit");
+function drawPath(path) {
+  path.forEach(p => {
+    const idx = p.r * SIZE + p.c;
+    if (idx >= 0 && idx < board.children.length) {
+      board.children[idx].classList.add("path");
     }
   });
-
-  // Reveal all atoms
-  atoms.forEach(({ r, c }) => {
-    const cell = document.querySelector(`.cell[data-row='${r}'][data-col='${c}']`);
-    if (!cell.classList.contains("guess")) {
-      cell.classList.add("atom");
-    }
-  });
-
-  setTimeout(() => {
-    alert(`You found ${correct}/${atomCount} atoms.`);
-  }, 100);
 }
 
-resetGame();
+function clearPaths() {
+  document.querySelectorAll(".path").forEach(cell => cell.classList.remove("path"));
+}
+
+revealBtn.addEventListener("click", () => {
+  atoms.forEach(idx => board.children[idx].classList.add("atom"));
+});
