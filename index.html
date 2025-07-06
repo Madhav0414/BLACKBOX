@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Black Box Game</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Black Box</h1>
+  <p>Click a border number (1–32) to fire a ray.</p>
+  <div class="rule-box">
+  Game Rules
+  <div class="rules-content">
+    <ul>
+      <li>Click a border number (1–32) to fire a ray.</li>
+      <li>Rays can be deflected by nearby atoms.</li>
+      <li>Rays never reverse direction after deflection.</li>
+      <li>Use the revealed paths to guess atom positions.</li>
+      <li>Click 'Start Guessing' to select four atom locations.</li>
+      <li>Click 'Reveal Atoms' to show the correct positions.</li>
+    </ul>
+  </div>
+</div>
+
+  <div id="board" class="board"></div>
+  <p id="guess-count">Guesses: 0</p>
+  <button id="reveal">Reveal Atoms</button>
+  <div id="log" class="log"></div>
+
+  <script src="script.js"></script>
+</body>

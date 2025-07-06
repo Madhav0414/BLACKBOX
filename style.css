@@ -1,0 +1,121 @@
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
+  background: linear-gradient(to right, #667eea, #764ba2);
+  color: #fff;
+  padding: 20px;
+}
+
+h1 {
+  font-size: 3em;
+  margin-bottom: 15px;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(10, 55px); /* Perfect moderate size */
+  width: max-content;
+  margin: 20px auto;
+  gap: 3px; /* Balanced gaps */
+}
+
+.cell {
+  width: 55px;  /* Comfortable cell size */
+  height: 55px;
+  background: #fff;
+  border: 2px solid #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2em;  /* Appropriately sized numbers */
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.cell:hover {
+  transform: scale(1.05);
+}
+
+.guess {
+  background-color: orange !important;
+}
+
+.border {
+  background: #333;
+  color: #fff;
+  cursor: pointer;
+}
+
+.atom {
+  background: black;
+  border-radius: 50%;
+}
+
+.log {
+  margin-top: 25px;
+  max-height: 250px;
+  overflow-y: auto;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 1.1em;
+}
+
+button {
+  background: #ff7f50;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 1.2em;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+  margin: 12px;
+}
+
+.rule-box {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: #ff7f50;
+  color: white;
+  padding: 12px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.2em;
+  transition: background 0.3s;
+}
+
+.rule-box:hover {
+  background: #ff4500;
+}
+
+.rules-content {
+  display: none;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 8px;
+  text-align: left;
+  font-size: 0.9em;
+  position: absolute;
+  top: 45px;
+  right: 0;
+  width: 300px;
+  z-index: 100;
+}
+
+.rule-box:hover .rules-content {
+  display: block;
+}
+
+button:hover {
+  background: #ff4500;
+}
+
+#guess-count {
+  font-size: 1.3em;
+}
