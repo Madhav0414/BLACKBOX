@@ -8,13 +8,32 @@ const SIZE = 10;
 let atoms = [];
 let guessCount = 0;
 let playerGuesses = [];
+let usedRays = new Set();
+let revealed = false;
+
+let raysAbsorbed = 0;
+let raysReflected = 0;
+let raysExited = 0;
 
 function startGame(count) {
   atomCount = count;
+  atoms = generateRandomAtoms(atomCount);
   document.getElementById("difficulty-screen").style.display = "none";
   document.getElementById("game-container").style.display = "flex";
-  atoms = generateRandomAtoms(atomCount);
   buildBoard();
+  resetStats();
+  updateGuessCount();
+  revealed = false;
+}
+
+function resetStats() {
+  guessCount = 0;
+  raysAbsorbed = 0;
+  raysReflected = 0;
+  raysExited = 0;
+  usedRays.clear();
+  playerGuesses = [];
+  log.innerHTML = "<h2>Game Log</h2>";
 }
 
 function generateRandomAtoms(count) {
@@ -40,8 +59,9 @@ function buildBoard() {
         const num = getBorderNumber(r, c);
         if (num !== null) {
           cell.classList.add("border");
-          cell.textContent = String(num).padStart(2, "0");
-          cell.addEventListener("click", () => fireRay(num));
+          cell.textContent = num;
+          cell.id = `border-${num}`;
+          cell.addEventListener("click", () => fireRay(num, cell));
         }
       } else {
         cell.addEventListener('click', () => handleCellClick(r, c));
@@ -68,9 +88,14 @@ function getEntry(num) {
   return null;
 }
 
-function fireRay(entry) {
+function fireRay(entry, cell) {
+  if (usedRays.has(entry) || revealed) return;
+
+  usedRays.add(entry);
+  cell.style.backgroundColor = "#aaa"; // Visually gray the used ray
   guessCount++;
-  guessCountDisplay.textContent = `Guesses: ${guessCount}`;
+  updateGuessCount();
+
   let { pos, dir } = getEntry(entry);
   let firstMove = true;
 
@@ -80,8 +105,10 @@ function fireRay(entry) {
     if (pos.r === 0 || pos.r === SIZE - 1 || pos.c === 0 || pos.c === SIZE - 1) {
       const exit = getBorderNumber(pos.r, pos.c);
       if (exit === entry && firstMove) {
+        raysReflected++;
         log.innerHTML += `<div>Ray ${entry} → Reflected</div>`;
       } else {
+        raysExited++;
         log.innerHTML += `<div>Ray ${entry} → Exited at ${exit}</div>`;
       }
       return;
@@ -90,6 +117,7 @@ function fireRay(entry) {
     const idx = pos.r * SIZE + pos.c;
 
     if (atoms.includes(idx)) {
+      raysAbsorbed++;
       log.innerHTML += `<div>Ray ${entry} → Absorbed</div>`;
       return;
     }
@@ -100,6 +128,7 @@ function fireRay(entry) {
     if ((occupiedDiagonals.includes("NW") && occupiedDiagonals.includes("SE")) ||
       (occupiedDiagonals.includes("NE") && occupiedDiagonals.includes("SW"))) {
       if (firstMove) {
+        raysReflected++;
         log.innerHTML += `<div>Ray ${entry} → Reflected</div>`;
       }
       return;
@@ -123,16 +152,18 @@ function getDiagonals(pos) {
 }
 
 function deflect(dir, diag) {
-  if (dir.r === 1 && dir.c === 0 || dir.r === -1 && dir.c === 0) {
+  if ((dir.r === 1 && dir.c === 0) || (dir.r === -1 && dir.c === 0)) {
     return (diag === "NW" || diag === "SW") ? { r: 0, c: 1 } : { r: 0, c: -1 };
   }
-  if (dir.r === 0 && dir.c === 1 || dir.r === 0 && dir.c === -1) {
+  if ((dir.r === 0 && dir.c === 1) || (dir.r === 0 && dir.c === -1)) {
     return (diag === "NW" || diag === "NE") ? { r: 1, c: 0 } : { r: -1, c: 0 };
   }
   return dir;
 }
 
 function handleCellClick(r, c) {
+  if (revealed) return;
+
   const idx = r * SIZE + c;
   if (playerGuesses.includes(idx)) {
     playerGuesses = playerGuesses.filter(i => i !== idx);
@@ -143,8 +174,25 @@ function handleCellClick(r, c) {
   }
 }
 
+function updateGuessCount() {
+  guessCountDisplay.textContent = `Guesses: ${guessCount} | Absorbed: ${raysAbsorbed} | Reflected: ${raysReflected} | Exited: ${raysExited}`;
+}
+
 revealBtn.addEventListener("click", () => {
+  if (revealed) return;
+  revealed = true;
+
   atoms.forEach(idx => board.children[idx].classList.add("atom"));
   let correct = playerGuesses.filter(g => atoms.includes(g)).length;
-  log.innerHTML += `<div>You guessed ${correct}/${atomCount} atom(s) correctly.</div>`;
+  let message = `Game Over! You guessed ${correct}/${atomCount} atom(s) correctly.`;
+
+  if (correct === atomCount) {
+    message += " Perfect!";
+  } else if (correct >= atomCount - 1) {
+    message += " Very Good!";
+  } else if (correct === 0) {
+    message += " Try again!";
+  }
+
+  log.innerHTML += `<div><strong>${message}</strong></div>`;
 });
