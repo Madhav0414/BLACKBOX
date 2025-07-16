@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Black Box Game</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
   <div class="difficulty-screen" id="difficulty-screen">
     <h2>Select Difficulty</h2>
     <button onclick="startGame(3)">Easy (3 Atoms)</button>
@@ -14,11 +15,11 @@
     <button onclick="startGame(5)">Hard (5 Atoms)</button>
   </div>
 
-  <div class="container" id="game-container" style="display:none;">
+  <div class="container" id="game-container" style="display: none;">
     <div class="rules-panel">
       <h2>Game Rules</h2>
       <ul>
-        <li>Click a border number (1-32) to fire a ray</li>
+        <li>Click a border number (1–32) to fire a ray</li>
         <li>Rays can be deflected by nearby atoms</li>
         <li>Rays never reverse direction after deflection</li>
         <li>Click any cell to place/remove a guess</li>
@@ -28,12 +29,15 @@
 
     <div class="game-area">
       <h1>Black Box</h1>
-      <p>Click a border number (1-32) to fire a ray</p>
+      <p>Click a border number (1–32) to fire a ray</p>
       <div id="board" class="board"></div>
-      <p id="guess-count">Guesses: 0</p>
-      <button id="reveal">Reveal Atoms</button>
-      <button onclick="location.reload()">Restart Game</button>
 
+      <p id="guess-count">Guesses: 0</p>
+
+      <div class="controls">
+        <button id="reveal">Reveal Atoms</button>
+        <button onclick="location.reload()">Restart Game</button>
+      </div>
     </div>
 
     <div id="log" class="log-panel">

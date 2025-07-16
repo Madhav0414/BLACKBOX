@@ -175,7 +175,7 @@ function handleCellClick(r, c) {
 }
 
 function updateGuessCount() {
-  guessCountDisplay.textContent = `Guesses: ${guessCount} | Absorbed: ${raysAbsorbed} | Reflected: ${raysReflected} | Exited: ${raysExited}`;
+  guessCountDisplay.textContent = `Guesses: ${guessCount}   `;
 }
 
 revealBtn.addEventListener("click", () => {

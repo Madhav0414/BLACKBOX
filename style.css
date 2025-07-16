@@ -1,5 +1,5 @@
 :root {
-  --primary: rgba(180,212,75);
+  --primary: rgba(180, 212, 75);
   --dark: #2c3e50;
   --light: #ecf0f1;
   --highlight: #e74c3c;
@@ -28,33 +28,55 @@ h2 {
   margin-bottom: 15px;
   font-size: 1.4em;
 }
-
 .container {
   display: flex;
+  flex-wrap: wrap;
   gap: 20px;
   max-width: 1200px;
   margin: 0 auto;
+  justify-content: center;
+  align-items: center; /* ⬅️ This vertically centers children */
+  min-height: 90vh;     /* ⬅️ Optional: adds vertical space to center */
 }
 
-.rules-panel, .log-panel {
-  width: 25%;
-  background:#ffffff;
+.rules-panel {
+  background: #ffffff;
   padding: 15px;
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  width: fit-content;
+  align-self: center; /* ⬅️ This centers it vertically in the container */
+}
+
+.log-panel {
+  flex: 1 1 250px;
+  min-width: 250px;
+  background: #ffffff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.log-panel div {
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
 }
 
 .game-area {
-  flex: 1;
+  flex: 2 1 400px;
+  min-width: 300px;
   text-align: center;
 }
 
 .board {
   display: grid;
-  grid-template-columns: repeat(10, minmax(30px, 50px));
-  margin: 20px auto;
+  grid-template-columns: repeat(10, minmax(30px, 1fr));
   gap: 2px;
-  width: max-content;
+  margin: 20px auto;
+  width: 100%;
+  max-width: 500px;
 }
 
 .cell {
@@ -67,6 +89,7 @@ h2 {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-size: 0.9rem;
 }
 
 .cell:hover {
@@ -113,16 +136,6 @@ button:hover {
   background: var(--dark);
 }
 
-.log-panel {
-  max-height: 500px;
-  overflow-y: auto;
-}
-
-.log-panel div {
-  padding: 8px 0;
-  border-bottom: 1px solid #eee;
-}
-
 .difficulty-screen {
   text-align: center;
   max-width: 500px;
@@ -144,4 +157,25 @@ button:hover {
   display: block;
   width: 200px;
   margin: 15px auto;
+}
+
+/* Media Queries for Small Screens */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    padding: 10px;
+  }
+
+  .rules-panel, .log-panel, .game-area {
+    width: 100%;
+  }
+
+  .board {
+    max-width: 100%;
+    grid-template-columns: repeat(10, 1fr);
+  }
+
+  .cell {
+    font-size: 0.7rem;
+  }
 }
